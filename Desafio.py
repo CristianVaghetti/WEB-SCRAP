@@ -105,7 +105,7 @@ def getSocialNetworks(HtmlCode):
 
 
 
-HtmlCode = getHtmlCode('https://stackoverflow.com/questions/35956045/extract-title-with-beautifulsoup')
+HtmlCode = getHtmlCode('https://skeel.com.br/contato/')
 #print(getTitle(HtmlCode))
 #print(getURL(HtmlCode))
 #print(getH1(HtmlCode))
