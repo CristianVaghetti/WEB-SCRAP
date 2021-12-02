@@ -2,6 +2,9 @@ import urllib.request
 from bs4 import BeautifulSoup 
 import json
 from urllib.parse import urlparse
+import re
+
+regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'  #parametros pro teste do regex no metodo getEmail
 
 def getHtmlCode(URLCode):
     resposta = urllib.request.urlopen(URLCode) 
@@ -22,7 +25,7 @@ def getURL(HtmlCode):
     for link in HtmlCode.findAll('a'): # procura todas as tag <a> no código HTML
         hrefs = link.get("href") # pega o conteúdo de href
         if hrefs != None and hrefs.startswith('http'): # verifica se href tem conteúdo e verifica de esse conteúdo começa com http
-            array.append(hrefs) #se começar com http ele insere no array
+            array.append(hrefs) #se começar com http ele insere no array (presuminto que se começa com http é url)
     jason = json.dumps(list(set(array)))
 
     return jason
@@ -84,10 +87,10 @@ def getSocialNetworks(HtmlCode):
     array = []
     social = ['facebook', 'linkedin', 'whatsapp', 'youtube', 'twitter', 'instagram']  
     listaURLs = json.loads(getURL(HtmlCode)) 
-    for link in listaURLs: # for para percorrer todos as urls retornadas da função getURL
+    for link in listaURLs: # for para percorrer todas as urls retornadas da função getURL
         for algum in social: # vai percorrer o array social
             if algum in link: # comparar se o URL possui o conteudo da string do array social
-                array.append(algum+": "+link) 
+                array.append(algum+": "+link) # concatena a string indice[algum] do array social + o URL que contem o algum 
     jason = json.dumps(array)
     return jason
 
@@ -101,6 +104,23 @@ def getText(HtmlCode):
     
     return list(set(array))
 
+
+# def getEmail(HtmlCode):
+#     array = []
+#     for stringi in HtmlCode.findAll(): # vai percorrer todas as tags do codigo
+#         if stringi.string != None and stringi.string.startswith("E-mail"): # neste caso, so vai funcionar se a tag anunciando o email obedecer os formatos oferecidos
+#             array.append(stringi.next_sibling.strip()) # uma vez que o enderço de email esta na proxima tag que esta anunciando-o o metodo next_sibling resolve 
+#     jason = json.dumps(list(set(array)))
+#     return jason
+
+def getEmail(HtmlCode):
+    array = []
+    for stringi in HtmlCode.findAll(): # vai percorrer todas as tags do codigo
+        # if stringi.string != None and re.fullmatch(regex, stringi.string):  # assim como está se a string conter @ ele já insere no array(pode não ser um email)
+        if stringi.string != None and re.fullmatch(regex, stringi.string): # o regex vai fazer a checagem pra ver se a string é um email válido 
+            array.append(stringi.string.strip()) # se passar no teste vai pro array
+    jason = json.dumps(list(set(array)))
+    return jason
 
 
 
@@ -119,5 +139,5 @@ HtmlCode = getHtmlCode('https://skeel.com.br/contato/')
 #print(getMetas(HtmlCode))
 # print(getDomain(HtmlCode))
 #print(getSocialNetworks(HtmlCode))
-#print(getEmail(HtmlCode))
-print(getText(HtmlCode))
+print(getEmail(HtmlCode))
+#print(getText(HtmlCode))
