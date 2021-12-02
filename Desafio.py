@@ -4,13 +4,13 @@ import json
 from urllib.parse import urlparse
 
 def getHtmlCode(URLCode):
-    resposta = urllib.request.urlopen(URLCode)
-    getStringHTML = resposta.read().decode("UTF-8")
-    HtmlCode = BeautifulSoup(getStringHTML, 'html.parser')
-    for script in HtmlCode(["script", "style"]):
-        script.extract()
+    resposta = urllib.request.urlopen(URLCode) 
+    getHTML = resposta.read().decode("UTF-8") # carrega o código na forma de string 
+    HtmlCode = BeautifulSoup(getHTML, 'html.parser') # converte a string em objeto
+    for script in HtmlCode(["script", "style"]): # remove as tag script e style do codigo
+        script.extract()  
 
-    return HtmlCode
+    return HtmlCode # retorna o código HTML na forma de objeto
 
 def getTitle(HtmlCode):
     title = HtmlCode.find('title')
@@ -19,11 +19,11 @@ def getTitle(HtmlCode):
 
 def getURL(HtmlCode):
     array = []    
-    for link in HtmlCode.findAll('a'):
-        hrefs = link.get("href")
-        if hrefs != None and hrefs.startswith('http'):
-            array.append(hrefs)
-    jason = json.dumps(list(set(array)))  
+    for link in HtmlCode.findAll('a'): # procura todas as tag <a> no código HTML
+        hrefs = link.get("href") # pega o conteúdo de href
+        if hrefs != None and hrefs.startswith('http'): # verifica se href tem conteúdo e verifica de esse conteúdo começa com http
+            array.append(hrefs) #se começar com http ele insere no array
+    jason = json.dumps(list(set(array)))
 
     return jason
 
@@ -31,31 +31,28 @@ def getURL(HtmlCode):
 def getH1(HtmlCode):
     array = []
     for h1 in HtmlCode.findAll('h1'):
-        array.append(h1.text.strip())
+        array.append(h1.text.strip()) #apos procurar a tag H1, ele insere o conteudo string da tag no array
     jason = json.dumps(array)
     
     return jason
 
-# def getText(HtmlCode):    
-#     texto = HtmlCode.get_text()
-
-#     return texto
 
 def getMetas(HtmlCode):
     array = []
     for metas in HtmlCode.findAll('meta'):
-        array.append(metas.attrs)
+        array.append(metas.attrs) # depois de achar a tag meta coloca o conteudo dessa tag em um array 
         #if metas.get("content") != None:  
             #array.append(metas.get("content"))   
-    jason = json.dumps(array)
+    jason = json.dumps(array) # transforma o array em um json
 
     return jason
 
+
 def getDomain(HtmlCode):
     array = []
-    listaURLs= json.loads(getURL(HtmlCode))
+    listaURLs= json.loads(getURL(HtmlCode)) # a função getURL retorna um json então tem que converter esse json em um objeto
     for links in listaURLs:
-        dominio = urlparse(links).netloc
+        dominio = urlparse(links).netloc # função que achei na internet pra pegar somente o dominio da url
         array.append(dominio)
     
     jason = json.dumps(list(set(array)))
@@ -86,13 +83,23 @@ def getDomain(HtmlCode):
 def getSocialNetworks(HtmlCode):
     array = []
     social = ['facebook', 'linkedin', 'whatsapp', 'youtube', 'twitter', 'instagram']  
-    listaURLs = json.loads(getURL(HtmlCode))
-    for link in listaURLs:
-        for algum in social:
-            if algum in link:
-                array.append(algum+": "+link)
+    listaURLs = json.loads(getURL(HtmlCode)) 
+    for link in listaURLs: # for para percorrer todos as urls retornadas da função getURL
+        for algum in social: # vai percorrer o array social
+            if algum in link: # comparar se o URL possui o conteudo da string do array social
+                array.append(algum+": "+link) 
     jason = json.dumps(array)
     return jason
+
+def getText(HtmlCode):
+    array = []
+    for stringi in HtmlCode.findAll(): # vai percorrer todas as tags do codigo
+        if stringi.string != None:
+            array.append(stringi.string) # vai inserir no array somente se a tag possuir uma string 
+           
+    jason = json.dumps(list(set(array))) ################################ nesse caso, ele não sabe converter os acentos ---bug do codigo--- 
+    
+    return list(set(array))
 
 
 
@@ -110,5 +117,7 @@ HtmlCode = getHtmlCode('https://skeel.com.br/contato/')
 #print(getURL(HtmlCode))
 #print(getH1(HtmlCode))
 #print(getMetas(HtmlCode))
-#print(getDomain(HtmlCode))
-print(getSocialNetworks(HtmlCode))
+# print(getDomain(HtmlCode))
+#print(getSocialNetworks(HtmlCode))
+#print(getEmail(HtmlCode))
+print(getText(HtmlCode))
