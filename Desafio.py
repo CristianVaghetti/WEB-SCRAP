@@ -116,7 +116,7 @@ def getText(HtmlCode):
 def getEmails(HtmlCode):
     array = []
     for stringi in HtmlCode.findAll(): # vai percorrer todas as tags do codigo
-        # if stringi.string != None and re.fullmatch(regex, stringi.string):  # assim como está se a string conter @ ele já insere no array(pode não ser um email)
+        #if stringi.string != None and '@' in stringi.string :  # assim como está se a string conter @ ele já insere no array(pode não ser um email)
         if stringi.string != None and re.fullmatch(regex, stringi.string): # o regex vai fazer a checagem pra ver se a string é um email válido 
             array.append(stringi.string.strip()) # se passar no teste vai pro array
     jason = json.dumps(list(set(array)))
