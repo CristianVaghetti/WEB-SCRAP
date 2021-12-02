@@ -4,7 +4,7 @@ import json
 from urllib.parse import urlparse
 import re
 
-regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'  #parametros pro teste do regex no metodo getEmail
+regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'  #parametros pro teste do regex no metodo getEmails
 
 def getHtmlCode(URLCode):
     resposta = urllib.request.urlopen(URLCode) 
@@ -113,7 +113,7 @@ def getText(HtmlCode):
 #     jason = json.dumps(list(set(array)))
 #     return jason
 
-def getEmail(HtmlCode):
+def getEmails(HtmlCode):
     array = []
     for stringi in HtmlCode.findAll(): # vai percorrer todas as tags do codigo
         # if stringi.string != None and re.fullmatch(regex, stringi.string):  # assim como está se a string conter @ ele já insere no array(pode não ser um email)
@@ -139,5 +139,5 @@ HtmlCode = getHtmlCode('https://skeel.com.br/contato/')
 #print(getMetas(HtmlCode))
 # print(getDomain(HtmlCode))
 #print(getSocialNetworks(HtmlCode))
-print(getEmail(HtmlCode))
+print(getEmails(HtmlCode))
 #print(getText(HtmlCode))
