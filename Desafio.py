@@ -7,6 +7,7 @@ import re
 
 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'  #parametros pro teste do regex para emails
 regex_tel = '^\([1-9]{2}\) (?:[2-8]|9[1-9])[0-9]{3}\-[0-9]{4}$' #parametros pro teste do redex para telefones
+
 def getHtmlCode(URLCode):
     resposta = urllib.request.urlopen(URLCode) 
     getHTML = resposta.read().decode("UTF-8") # carrega o código na forma de string 
@@ -36,7 +37,7 @@ def getH1(HtmlCode):
     array = []
     for h1 in HtmlCode.findAll('h1'):
         array.append(h1.text.strip()) #apos procurar a tag H1, ele insere o conteudo string da tag no array
-    jason = json.dumps(array)
+    jason = json.dumps(list(set(array)), ensure_ascii=False)
     
     return jason
 
@@ -47,7 +48,7 @@ def getMetas(HtmlCode):
         array.append(metas.attrs) # depois de achar a tag meta coloca o conteudo dessa tag em um array 
         #if metas.get("content") != None:  
             #array.append(metas.get("content"))   
-    jason = json.dumps(array) # transforma o array em um json
+    jason = json.dumps(array, ensure_ascii=False) # transforma o array em um json
 
     return jason
 
@@ -101,7 +102,7 @@ def getText(HtmlCode):
         if stringi.string != None:
             array.append(stringi.string) # vai inserir no array somente se a tag possuir uma string 
            
-    jason = json.dumps(list(set(array))) ################################ nesse caso, ele não sabe converter os acentos ---bug do codigo--- 
+    jason = json.dumps(list(set(array)), ensure_ascii=False) # o ensure_ascii vai fazer a conversão dos acentos, sem isso o dumps não entende os acentos ortograficos
     
     return jason
 
@@ -120,7 +121,7 @@ def getEmails(HtmlCode):
         #if stringi.string != None and '@' in stringi.string :  # assim como está se a string conter @ ele já insere no array(pode não ser um email)
         if strings.string != None and re.fullmatch(regex, strings.string): # o regex vai fazer a checagem pra ver se a string é um email válido 
             array.append(strings.string.strip()) # se passar no teste vai pro array
-    jason = json.dumps(list(set(array)))
+    jason = json.dumps(list(set(array)), ensure_ascii=False)
     return jason
 
 
@@ -148,21 +149,26 @@ def getPhones(HtmlCode):
     jason = json.dumps(list(set(array))) # pega o array e tranforma em json
     return jason
 
-
-
-
-
+def getAddress(HtmlCode):
+    array = []
+    for mendrulho in HtmlCode.findAll():    
+        if mendrulho.get("class") == "address":
+                array.append(mendrulho.string)
+    jason = json.dumps(list(set(array)), ensure_ascii=False)
+    return jason
+# o getAdress não irá funcionar em determinados sites, se o address for gerado dinamicamente via javascript e processado direto no browser
 
 
 HtmlCode = getHtmlCode('https://skeel.com.br/contato/')
-
+#print(HtmlCode)
 #print(getTitle(HtmlCode))
 #print(getURL(HtmlCode))
 #print(getH1(HtmlCode))
-#print(getMetas(HtmlCode))
-# print(getDomain(HtmlCode))
+print(getMetas(HtmlCode))
+#print(getDomain(HtmlCode))
 #print(getSocialNetworks(HtmlCode))
-print(getEmails(HtmlCode))
+#print(getEmails(HtmlCode))
 #print(getText(HtmlCode))
 #print(getResume(HtmlCode))
-print(getPhones(HtmlCode))
+#print(getPhones(HtmlCode))
+#print(getAddress(HtmlCode))
