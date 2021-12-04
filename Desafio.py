@@ -1,11 +1,12 @@
+from ctypes import Array
 import urllib.request
 from bs4 import BeautifulSoup 
 import json
 from urllib.parse import urlparse
 import re
 
-regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'  #parametros pro teste do regex no metodo getEmails
-
+regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'  #parametros pro teste do regex para emails
+regex_tel = '^\([1-9]{2}\) (?:[2-8]|9[1-9])[0-9]{3}\-[0-9]{4}$' #parametros pro teste do redex para telefones
 def getHtmlCode(URLCode):
     resposta = urllib.request.urlopen(URLCode) 
     getHTML = resposta.read().decode("UTF-8") # carrega o código na forma de string 
@@ -102,7 +103,7 @@ def getText(HtmlCode):
            
     jason = json.dumps(list(set(array))) ################################ nesse caso, ele não sabe converter os acentos ---bug do codigo--- 
     
-    return list(set(array))
+    return jason
 
 
 # def getEmail(HtmlCode):
@@ -115,11 +116,36 @@ def getText(HtmlCode):
 
 def getEmails(HtmlCode):
     array = []
-    for stringi in HtmlCode.findAll(): # vai percorrer todas as tags do codigo
+    for strings in HtmlCode.findAll(): # vai percorrer todas as tags do codigo
         #if stringi.string != None and '@' in stringi.string :  # assim como está se a string conter @ ele já insere no array(pode não ser um email)
-        if stringi.string != None and re.fullmatch(regex, stringi.string): # o regex vai fazer a checagem pra ver se a string é um email válido 
-            array.append(stringi.string.strip()) # se passar no teste vai pro array
+        if strings.string != None and re.fullmatch(regex, strings.string): # o regex vai fazer a checagem pra ver se a string é um email válido 
+            array.append(strings.string.strip()) # se passar no teste vai pro array
     jason = json.dumps(list(set(array)))
+    return jason
+
+
+
+def getResume(HtmlCode):
+    array = []
+    desc = ["charset", "lang"]
+    title = HtmlCode.find('title')
+    array.append(title.string)
+    for mendrulho in HtmlCode.findAll():
+        if mendrulho.get("name") == "description":
+            array.append(mendrulho.get("content"))
+        for descrition in desc:
+            if mendrulho.get(descrition) != None:
+                array.append(mendrulho.get(descrition))
+                        
+    #jason = json.dumps(list(set(array)))
+    return array
+
+def getPhones(HtmlCode):
+    array = []
+    for strings in HtmlCode.findAll(): # vai percorrer todas as tags do codigo
+        if strings.string != None and re.fullmatch(regex_tel, strings.string): # o regex_tel vai fazer a checagem pra ver se a string é um numer de telefone 
+            array.append(strings.string.strip()) # se passar no teste vai pro array
+    jason = json.dumps(list(set(array))) # pega o array e tranforma em json
     return jason
 
 
@@ -128,11 +154,8 @@ def getEmails(HtmlCode):
 
 
 
-
-
-
-
 HtmlCode = getHtmlCode('https://skeel.com.br/contato/')
+
 #print(getTitle(HtmlCode))
 #print(getURL(HtmlCode))
 #print(getH1(HtmlCode))
@@ -141,3 +164,5 @@ HtmlCode = getHtmlCode('https://skeel.com.br/contato/')
 #print(getSocialNetworks(HtmlCode))
 print(getEmails(HtmlCode))
 #print(getText(HtmlCode))
+#print(getResume(HtmlCode))
+print(getPhones(HtmlCode))
